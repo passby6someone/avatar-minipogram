@@ -1,0 +1,22 @@
+<view class="container" style="background-image:url({{url}}) ;">
+  <canvas type="2d" id="myCanvas" style="width:40vw;height:40vw;margin-top:15vh;"></canvas>
+  <view class="scroll-container">
+    <scroll-view scroll-x="true">
+    <view class="imglist-container">
+      <view wx:for="{{imgList0}}" class="img-container">
+        <image src="{{item}}" mode="widthFix" bindtap="chooseThis" data-src="{{item}}"></image>
+      </view>
+    </view>
+    <view class="imglist-container">
+      <view wx:for="{{imgList1}}" class="img-container">
+        <image src="{{item}}" mode="widthFix" bindtap="chooseThis" data-src="{{item}}"></image>
+      </view>
+    </view>
+  </scroll-view>
+  </view>
+  <view style="width:100%;text-align:right;color:gray;"><text decode="{{true}}">&lt;左滑更多毕业头像</text></view>
+  <view class="button-container">
+    <button class="cu-btn round lg bg-white" style="width:45%;color:orange" bindtap="save">保存</button>
+    <button class="cu-btn round lg bg-white" style="width:45%;color:orange" bindtap="navBack">返回</button>  
+  </view>
+</view>

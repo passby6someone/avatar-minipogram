@@ -1,0 +1,46 @@
+/* miniprogram/pages/avatarMaker/avatarMaker.wxss */
+.container{
+  width: 100vw;
+  height: 100vh;
+  background-size:100% 100%;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  align-items: center;
+}
+.scroll-container{
+  width: 100vw;
+  margin-top:20px;
+  padding: 0px 20px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+scroll-view{
+  margin-bottom: 1vh;
+  height: auto;
+}
+.imglist-container{
+  display: flex;
+  flex-direction: row;
+  margin-top: 1vh;
+}
+.img-container{
+  /* background-color: gray; */
+  width: 20vw;
+  margin-right: calc( ( 20vw  - 40px ) / 4);
+}
+.img-container image{
+  /* height: 10vh; */
+  background-color: gray;
+  width: 20vw;
+}
+.button-container{
+  width: 100%;
+  margin-top: 20px;
+  padding: 0px 20px;
+  display: flex;
+  justify-content: space-between;
+}
+.button-container>button{
+  width: 45%
+}

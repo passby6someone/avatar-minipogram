@@ -1,0 +1,34 @@
+<!-- <cu-custom bgColor="bg-gradual-pink" isBack="{{true}}">
+  <text slot="backText" class="cuIcon-back"></text>
+  <view slot="backText">返回</view>
+  <view slot="content">聊天</view>
+</cu-custom> -->
+<view class="container" style="background-image:url({{url}}) ;">
+  <!-- <view class="get"></view> -->
+  <!-- <open-data type="userAvatarUrl" style="width:100px;height:100px;"></open-data> -->
+  <view class="avatar-container" style="display: {{avatarContainer ? 'flex' : 'none'}}">
+    <view class="img" bindtap="showUserAvatar">
+      <!-- <open-data type="userAvatarUrl" style="display:{{avatar && !img ? 'block' : 'none'}}"></open-data> -->
+      <button style="display:{{!avatar ? 'block' : 'none'}}" open-type="getUserInfo">点击获取微信头像</button>
+      <image src="{{imgSrc}}" style="display:{{avatar ? 'block' : 'none'}}"></image>
+    </view>
+    <view class="choose">
+      <button class="cu-btn round lg bg-white" open-type="getUserInfo" style="width:45%" bindtap="showUserAvatar">微信头像</button>
+      <button class="cu-btn round lg bg-white" style="width:45%" bindtap="chooseImg">相册照片</button>
+    </view>
+    <view class="start">
+      <button class="cu-btn round lg bg-orange light" style="width:95%" bindtap="navToMake">开始制作毕业头像</button>
+    </view>
+  </view>
+  <view class="cropperImg" style="display: {{!avatarContainer ? 'flex' : 'none'}}">
+    <import src="../../weCropper/we-cropper.wxml" />
+    <view class="cropper-wrapper">
+      <template is="we-cropper" data="{{...cropperOpt}}" />
+      <view class="cropper-buttons">
+        <view class="getCropperImage" bindtap="getCropperImage">
+          <button class="cu-btn bg-grey lg" style="width:100%;height:50px;">完成</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
