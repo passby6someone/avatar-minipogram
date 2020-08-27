@@ -3,17 +3,17 @@
   <view slot="backText">返回</view>
   <view slot="content">聊天</view>
 </cu-custom> -->
-<view class="container" style="background-image:url({{url}}) ;">
+<view class="container">
   <!-- <view class="get"></view> -->
   <!-- <open-data type="userAvatarUrl" style="width:100px;height:100px;"></open-data> -->
   <view class="avatar-container" style="display: {{avatarContainer ? 'flex' : 'none'}}">
-    <view class="img" bindtap="showUserAvatar">
+    <view class="img">
       <!-- <open-data type="userAvatarUrl" style="display:{{avatar && !img ? 'block' : 'none'}}"></open-data> -->
-      <button style="display:{{!avatar ? 'block' : 'none'}}" open-type="getUserInfo">点击获取微信头像</button>
+      <button style="display:{{!avatar ? 'block' : 'none'}}" open-type="getUserInfo" bindgetuserinfo="showUserAvatar">点击获取微信头像</button>
       <image src="{{imgSrc}}" style="display:{{avatar ? 'block' : 'none'}}"></image>
     </view>
     <view class="choose">
-      <button class="cu-btn round lg bg-white" open-type="getUserInfo" style="width:45%" bindtap="showUserAvatar">微信头像</button>
+      <button class="cu-btn round lg bg-white" open-type="getUserInfo" style="width:45%" bindgetuserinfo="showUserAvatar">微信头像</button>
       <button class="cu-btn round lg bg-white" style="width:45%" bindtap="chooseImg">相册照片</button>
     </view>
     <view class="start">
@@ -31,4 +31,11 @@
       </view>
     </view>
   </view>
+</view>
+
+<view style="position:absolute;z-index:-1;width:100vw;height:100vh;top:0px;left:0px;right:0px;bottom:0px;" animation="{{animationData}}">
+  <image src="../../images/background.jpg" style="width:100vw;height:100vh;"></image>
+</view>
+<view style="position:absolute;z-index:-2;width:100vw;height:100vh;top:0px;left:0px;right:0px;bottom:0px;">
+  <image src="{{url}}" style="width:100vw;height:100vh;" bindload="hideCompress"></image>
 </view>

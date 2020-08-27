@@ -4,12 +4,31 @@
     <scroll-view scroll-x="true">
     <view class="imglist-container">
       <view wx:for="{{imgList0}}" class="img-container">
-        <image src="{{item}}" mode="widthFix" bindtap="chooseThis" data-src="{{item}}"></image>
+        <image
+          src="{{item}}"
+          mode="widthFix"
+          animation="{{animationData0[index]}}"
+          bindtap="chooseThis" 
+          bindload="showThis"
+          data-src="{{item}}"
+          data-index="{{index}}"
+          data-column="0"
+        >
+        </image>
       </view>
     </view>
     <view class="imglist-container">
       <view wx:for="{{imgList1}}" class="img-container">
-        <image src="{{item}}" mode="widthFix" bindtap="chooseThis" data-src="{{item}}"></image>
+        <image
+          src="{{item}}"
+          mode="widthFix"
+          animation="{{animationData1[index]}}"
+          bindtap="chooseThis" 
+          bindload="showThis"
+          data-src="{{item}}"
+          data-index="{{index}}"
+          data-column="1"
+        ></image>
       </view>
     </view>
   </scroll-view>

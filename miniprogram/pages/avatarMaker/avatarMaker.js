@@ -1,5 +1,8 @@
+import { BACKGROUND, AVATARS } from '../../events.js';
+
+const App = getApp();
 // 可选择合成的模板的数量
-const imgNum = 10;
+// const imgNum = 6;
 
 Page({
 
@@ -9,8 +12,12 @@ Page({
   data: {
     url: '',
     origin: '',
+    authorize: true,
     imgList0:[],
     imgList1:[],
+    animationData0:[],
+    animationData1:[],
+    preAvater: '',
     imgSize:0,
     dpr:0
   },
@@ -20,31 +27,29 @@ Page({
    */
   onLoad: function(options) {
     var that = this;
-
-    // 图片我是用0-n.png来命名的，imgNum在第一行声明了，这个数组用于wx:for进行列表渲染
-    let list = [];
-    for (let i = 0; i < imgNum;i++){
-      list.push(`../../images/${i}.png`)
-    }
-    // options.src是index页传过来的参数，是需要合成的图片的地址
-    this.setData({
-      origin: options.src,
-      imgList0: list.slice(0, Math.ceil(list.length / 2)),
-      imgList1: list.slice(Math.ceil(list.length / 2))
-    });
     // 用于获取背景图像，背景图像我放云储存里了
-    wx.cloud.getTempFileURL({
-      fileList: [{
-        fileID: 'cloud://tufe-graduate-pridt.7475-tufe-graduate-pridt-1302348245/background.jpg',
-      }]
-    }).then(res => {
+    const { events } = App.globalData;
+    console.log(App.globalData);
+    events.listen(BACKGROUND, () => {
       that.setData({
-        url: res.fileList[0]['tempFileURL']
+        url: App.globalData.backgroundUrl,
       });
-      console.log(res.fileList)
-    }).catch(error => {
-      // handle error
     });
+    console.log(that.data);
+    // 图片我是用0-n.png来命名的，imgNum在第一行声明了，这个数组用于wx:for进行列表渲染
+    events.listen(AVATARS, () => {
+      // options.src是index页传过来的参数，是需要合成的图片的地址
+      const { avatarImageNum, avatarUrls } = App.globalData;
+      console.log('avatarUrls', avatarUrls)
+      that.setData({
+        origin: options.src,
+        imgList0: avatarUrls.slice(0, Math.ceil(avatarImageNum / 2)),
+        imgList1: avatarUrls.slice(Math.ceil(avatarImageNum / 2))
+        // imgList0: avatarUrls.slice(0, 3),
+        // imgList1: avatarUrls.slice(3, 6)
+      });
+      console.log(that.data.imgList0, that.data.imgList1);
+    })
   },
 
   /**
@@ -133,8 +138,10 @@ Page({
     return shareObj;
   },
   chooseThis:function(e){
-    // console.log(e);
     var that = this;
+    if(this.data.preAvater === e.target.dataset['src']) {
+      return false;
+    }
     // 同上
     const query = wx.createSelectorQuery()
     query.select('#myCanvas')
@@ -160,17 +167,94 @@ Page({
         }).then(()=>{
           let img = canvas.createImage();
           img.src = e.target.dataset['src'];
+          // img.src = 'https://6176-avatar-rhixm-1302889945.tcb.qcloud.la/avatar/8.png'
+          console.log(e.target.dataset['src']);
           img.onload = () => {
             ctx.drawImage(img, 0, 0, imgSize, imgSize)
           }
-        })
-
+        }).then(() => {
+          that.setData({
+            preAvater: e.target.dataset['src'],
+          });
+        });
       })
   },
-  save:function(){
+  showThis: function (e) {
+    console.log(e);
+    const { index, column } = e.currentTarget.dataset;
+    let animation = wx.createAnimation({
+      delay: 600,
+      timingFunction: 'ease-out',
+    });
+    animation.opacity(1).step();
+    const animationDataIndex = `animationData${column}`;
+    const animationData = this.data[animationDataIndex];
+    animationData[index] = animation;
+    console.log(animationData);
+    this.setData({
+      [animationDataIndex]: animationData,
+    });
+    // return () => {
+    // }
+  },
+  save: async function(){
     console.log('save');
-    
     var that = this;
+    const { authorize } = this.data;
+    await new Promise((resolve, reject) => {
+      wx.getSetting({
+        success(result) {
+          if (!result.authSetting['scope.writePhotosAlbum'] && authorize) {
+            wx.authorize({
+              scope: 'scope.writePhotosAlbum',
+              success() {
+                resolve();
+              },
+              fail(err) {
+                console.log('fail',err);
+                that.setData({
+                  authorize:false,
+                })
+              }
+            });
+          }
+          else if (!result.authSetting['scope.writePhotosAlbum'] && !authorize) {
+            wx.showModal({
+              title: '提示',
+              content: '请允许小程序保存图片到相册',
+              success (res) {
+                if (res.confirm) {         
+                  wx.openSetting({
+                    success (res) {
+                      console.log(res.authSetting);
+                      if (res.authSetting["scope.writePhotosAlbum"]) {
+                        resolve();
+                      }
+                      else {
+                        reject();
+                      }
+                    },
+                    fail (err) {
+                      console.log(err);
+                      reject();
+                    }
+                  });
+                } else if (res.cancel) {
+                  console.log('用户点击取消')
+                }
+              }
+            });
+          }
+          else {
+            resolve();
+          }
+        },
+        fail(err){
+          console.log(err);
+          reject();
+        }
+      });
+    });
     const query = wx.createSelectorQuery()
     query.select('#myCanvas')
       .fields({
@@ -187,6 +271,9 @@ Page({
         // 写了很多promise避免回调地狱
         let tempFilePath = '';
         new Promise((resolve,reject)=>{
+          wx.showLoading({
+            title: '保存中',
+          });
           wx.canvasToTempFilePath({
             destWidth:1000,
             destHeight:1000,
@@ -201,48 +288,21 @@ Page({
             }
           })
         }).then(()=>{
-          return new Promise((resolve,reject)=>{
-            wx.getSetting({
-              success(result) {
-                console.log(result);
-                resolve(result);
-              },
-              fail(err){
-                reject(err);
-              }
-            })
-          });
-        }).then((res)=>{
-          return new Promise((resolve,reject)=>{
-            if (!res.authSetting['scope.writePhotosAlbum']) {
-              wx.authorize({
-                scope: 'scope.writePhotosAlbum',
-                success() {
-                  resolve();
-                },
-                fail(err) {
-                  reject(err);
-                }
-              })
-            }
-            else {
-              resolve();
-            }
-          })
-        }).then(()=>{
           wx.saveImageToPhotosAlbum({
             filePath: tempFilePath,
             success() {
+              wx.hideLoading();
               wx.showToast({
                 title: '保存成功',
                 icon: 'success',
                 duration: 2000
               })
-            }
+            },
+            fail() {
+              wx.hideLoading();
+            },
           });
-        }).catch((err)=>console.log)
-
-
+        }).catch((err)=>console.log);
       })
   },
   navBack:function(){

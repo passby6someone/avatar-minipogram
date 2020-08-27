@@ -32,7 +32,9 @@ scroll-view{
 .img-container image{
   /* height: 10vh; */
   background-color: gray;
+  height: 20vw;
   width: 20vw;
+  opacity: 0;
 }
 .button-container{
   width: 100%;

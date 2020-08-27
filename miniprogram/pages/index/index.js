@@ -1,5 +1,7 @@
 import WeCropper from '../../weCropper/we-cropper.js'
+import { BACKGROUND } from '../../events.js';
 
+const App = getApp();
 const device = wx.getSystemInfoSync() // 获取设备信息
 const width = device.windowWidth // 示例为一个与屏幕等宽的正方形裁剪框
 const height = device.windowHeight - 50;
@@ -15,6 +17,7 @@ Page({
     avatar:false,
     imgSrc:'',
     avatarContainer:true,
+    animationData: {},
     cropperOpt: {
       id: 'cropper', // 用于手势操作的canvas组件标识符
       targetId: 'targetCropper', // 用于用于生成截图的canvas组件标识符
@@ -37,21 +40,13 @@ Page({
    */
   onLoad: function (options) {
     var that = this;
-    wx.cloud.getTempFileURL({
-      fileList: [{
-        fileID:'cloud://tufe-graduate-pridt.7475-tufe-graduate-pridt-1302348245/background.jpg',
-        // maxAge: 60 * 60, // one hour
-      }]
-    }).then(res => {
-      // get temp file URL
+    console.log('data', App.globalData);
+    const { events } = App.globalData;
+    events.listen(BACKGROUND, () => {
       that.setData({
-        url: res.fileList[0]['tempFileURL']
+        url: App.globalData.backgroundUrl
       });
-      console.log(res.fileList)
-    }).catch(error => {
-      // handle error
     });
-
     const { cropperOpt } = this.data
 
     this.cropper = new WeCropper(cropperOpt)
@@ -116,7 +111,6 @@ Page({
    * 用户点击右上角分享
    */
   onShareAppMessage: function () {
-    var that = this;
     var shareObj = {
       title:'快来pick你喜欢的头像吧！',
       path:'/pages/index/index',
@@ -150,59 +144,12 @@ Page({
     })
   },
 
-  showUserAvatar:function(){
-    // console.log('once')
-    var that = this;
-    wx.getSetting({
-      success(res) {
-        console.log(res);
-        if (!res.authSetting['scope.userInfo']) {
-          wx.authorize({
-            scope: 'scope.userInfo',
-            success() {
-              console.log(233)
-              // 用户已经同意小程序使用录音功能，后续调用 wx.startRecord 接口不会弹窗询问
-              wx.getUserInfo({
-                success: (res) => {
-                  that.setData({
-                    avatar: true,
-                    imgSrc: res.userInfo.avatarUrl.replace('132', '0'),
-                  })
-                }
-              });
-            },
-            fail(err){
-              console.log(err);
-              var handle = setInterval(()=>{
-                console.log('?')
-                wx.getUserInfo({
-                  success: (res) => {
-                    that.setData({
-                      avatar: true,
-                      imgSrc: res.userInfo.avatarUrl.replace('132', '0'),
-                    })
-                  }
-                });
-                if(that.data.avatar){
-                  clearInterval(handle);
-                }
-              },1000)
-            }
-          })
-        }
-        else{
-          wx.getUserInfo({
-            success: (res) => {
-              that.setData({
-                avatar: true,
-                imgSrc: res.userInfo.avatarUrl.replace('132', '0'),
-              })
-            }
-          });
-        }
-      },
-      fail:console.log
-    })
+  showUserAvatar:function(e){
+    console.log(e);
+    this.setData({
+      avatar: true,
+      imgSrc: e.detail.userInfo.avatarUrl.replace('132', '0'),
+    });
   },
 
   chooseImg:function(){
@@ -223,6 +170,17 @@ Page({
     })
   },
 
+  hideCompress: function() {
+    let animation = wx.createAnimation({
+      delay: 500,
+      timingFunction: 'ease-out',
+    });
+    animation.opacity(0).step();
+    this.setData({
+      animationData: animation
+    })
+  },
+
   navToMake:function(){
     var that = this;
     if (that.data.imgSrc!==''){
@@ -235,13 +193,3 @@ Page({
     }
   }
 });
-
-// function once(callback){
-//   var once = true;
-//   return function(){
-//     if(once){
-//       callback(this);
-//       once = false;
-//     }
-//   }
-// }
